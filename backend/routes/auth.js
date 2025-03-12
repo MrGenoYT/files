@@ -143,6 +143,30 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
+// Check authentication status
+router.get('/check', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(200).json({ isAuthenticated: false });
+    }
+    res.json({
+      isAuthenticated: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        profilePicture: user.profilePicture,
+        createdAt: user.createdAt
+      }
+    });
+  } catch (err) {
+    console.error('Auth check error:', err);
+    res.status(200).json({ isAuthenticated: false });
+  }
+});
+
 // Logout user (for session based auth)
 router.get('/logout', (req, res) => {
   req.logout(function(err) {
